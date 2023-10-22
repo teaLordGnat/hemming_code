@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hemming code</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Hemming code</h1>
+        <div class="inner_container">
+            <div class="field">
+                <label for="text_to_encode">Закодировать: </label><input type="text" name="text_to_encode" id="text_to_encode" pattern="[0-1]{4}">
+            </div>
+            <div class="button_wrapper">
+                <button id="encode" disabled>Click me</button>
+            </div>
+
+            <hr>
+
+            <div class="field">
+                <label for="text_to_decode">Раскодировать: </label><input type="text" name="text_to_decode" id="text_to_decode" pattern="[0-1]{7}">
+            </div>
+
+            <div class="result_block">
+                <p id="result"></p>
+                <p id="error_message"></p>
+            </div>
+
+            <div class="button_wrapper">
+                <button id="decode" disabled>Click me</button>
+            </div>
+        </div>
+    </div>  
+
+    <script>
+        const check_input_value = (e) => {
+            const input_value = e.target.value;
+            const button = document.getElementById('encode');
+
+            button.disabled = !input_value.match(/^[01]{4}$/);
+        }
+
+        const check_output_value = (e) => {
+            const input_value = e.target.value;
+            const button = document.getElementById('decode');
+
+            button.disabled = !input_value.match(/^[01]{7}$/);
+        }
+
+        const encode = (e) => {
+            const input_value = document.getElementById('text_to_encode').value;
+            const splitted_value = input_value.split('').map((item) => parseInt(item));
+
+            let a = (splitted_value[0] + splitted_value[2] + splitted_value[3]) % 2;
+            let b = (splitted_value[0] + splitted_value[1] + splitted_value[3]) % 2;
+            let c = (splitted_value[1] + splitted_value[2] + splitted_value[3]) % 2;
+
+            document.getElementById('text_to_decode').value = input_value + a + b + c;
+        }
+
+        const decode = (e) => {
+            const input_value = document.getElementById('text_to_decode').value;
+            const splitted_value = input_value.split('').map((item) => parseInt(item));
+
+            let a = (splitted_value[0] + splitted_value[2] + splitted_value[3]) % 2 != splitted_value[4];
+            let b = (splitted_value[0] + splitted_value[1] + splitted_value[3]) % 2 != splitted_value[5];
+            let c = (splitted_value[1] + splitted_value[2] + splitted_value[3]) % 2 != splitted_value[6];
+
+            let result = input_value;
+            let message = 'We fixed some error in input value';
+            if (a && b && c) result = input_value.slice(0, 3) + (1 - splitted_value[3]) + input_value.slice(4);
+            else if (a && b) result = (1 - splitted_value[0]) + input_value.slice(1);
+            else if (b && c) result = input_value[0] + (1 - splitted_value[1]) + input_value.slice(2);
+            else if (a) result = input_value.slice(0, 4) + (1 - splitted_value[4]) + input_value.slice(5)
+            else if (b) result = input_value.slice(0, 5) + (1 - splitted_value[5]) + input_value.slice(6)
+            else if (c) result = input_value.slice(0, 6) + (1 - splitted_value[6]);
+            else message = 'No errors were found';
+
+            document.getElementById('result').innerHTML = result;
+            document.getElementById('error_message').innerHTML = message;
+        }
+
+        document.getElementById('encode').addEventListener('click', encode);
+        document.getElementById('decode').addEventListener('click', decode);
+        document.getElementById('text_to_encode').addEventListener('change', check_input_value);
+        document.getElementById('text_to_decode').addEventListener('change', check_output_value);
+    </script>
+</body>
+</html>
